@@ -62,6 +62,11 @@ def metric_card(label: str, value: str) -> None:
 
 def compact_trade_form(default: Trade | None = None, key_prefix: str = "quick") -> dict:
     default = default or Trade.empty()
+    status_value = getattr(default, "status", "Closed")
+    weight_value = getattr(default, "weight", "标准 (1A+1B)")
+    pnl_value = getattr(default, "pnl_amount", 0.0)
+    outcome_value = getattr(default, "outcome", "BE")
+    chart_value = getattr(default, "chart_url", "")
     st.caption("按你的日志习惯做了精简：先记一行流水，详细复盘以后再补。")
 
     c1, c2, c3, c4 = st.columns([1.1, 1, 1, 1])
@@ -73,7 +78,7 @@ def compact_trade_form(default: Trade | None = None, key_prefix: str = "quick") 
         status = st.selectbox(
             "状态",
             ["Closed", "Open", "Watching"],
-            index=["Closed", "Open", "Watching"].index(default.status) if default.status in ["Closed", "Open", "Watching"] else 0,
+            index=["Closed", "Open", "Watching"].index(status_value) if status_value in ["Closed", "Open", "Watching"] else 0,
             key=f"{key_prefix}_status",
         )
     with c4:
@@ -96,8 +101,8 @@ def compact_trade_form(default: Trade | None = None, key_prefix: str = "quick") 
         weight = st.selectbox(
             "权重",
             ["标准 (1A+1B)", "轻仓", "观察仓", "高确定性"],
-            index=["标准 (1A+1B)", "轻仓", "观察仓", "高确定性"].index(default.weight)
-            if default.weight in ["标准 (1A+1B)", "轻仓", "观察仓", "高确定性"]
+            index=["标准 (1A+1B)", "轻仓", "观察仓", "高确定性"].index(weight_value)
+            if weight_value in ["标准 (1A+1B)", "轻仓", "观察仓", "高确定性"]
             else 0,
             key=f"{key_prefix}_weight",
         )
@@ -106,17 +111,17 @@ def compact_trade_form(default: Trade | None = None, key_prefix: str = "quick") 
 
     c8, c9, c10 = st.columns([1, 1, 2])
     with c8:
-        pnl_amount = st.number_input("盈利", value=float(default.pnl_amount), step=1.0, key=f"{key_prefix}_pnl")
+        pnl_amount = st.number_input("盈利", value=float(pnl_value), step=1.0, key=f"{key_prefix}_pnl")
     with c9:
         inferred = "Profit" if result_r > 0 else "Loss" if result_r < 0 else "BE"
         outcome = st.selectbox(
             "结果",
             ["BE", "Profit", "Loss"],
-            index=["BE", "Profit", "Loss"].index(default.outcome if default.outcome in ["BE", "Profit", "Loss"] else inferred),
+            index=["BE", "Profit", "Loss"].index(outcome_value if outcome_value in ["BE", "Profit", "Loss"] else inferred),
             key=f"{key_prefix}_outcome",
         )
     with c10:
-        chart_url = st.text_input("图表", value=default.chart_url, placeholder="TradingView 链接", key=f"{key_prefix}_chart")
+        chart_url = st.text_input("图表", value=chart_value, placeholder="TradingView 链接", key=f"{key_prefix}_chart")
 
     entry_reason = st.text_input(
         "入场",
