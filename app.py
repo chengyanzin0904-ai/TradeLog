@@ -51,6 +51,8 @@ DISCIPLINE_RULES = [
     "公开内容不喊单、不承诺收益、不诱导交易。",
 ]
 
+STRATEGY_OPTIONS = ["高抛低吸", "突破回踩", "跌破回抽"]
+
 
 def refresh_trades() -> list[dict]:
     return list_trades()
@@ -91,10 +93,11 @@ def compact_trade_form(default: Trade | None = None, key_prefix: str = "quick") 
 
     c5, c6, c7 = st.columns([1.4, 1.1, 0.8])
     with c5:
-        strategy_name = st.text_input(
+        strategy_value = default.strategy_name if default.strategy_name in STRATEGY_OPTIONS else STRATEGY_OPTIONS[0]
+        strategy_name = st.selectbox(
             "策略",
-            value=default.strategy_name,
-            placeholder="震荡策略1：高抛低吸",
+            STRATEGY_OPTIONS,
+            index=STRATEGY_OPTIONS.index(strategy_value),
             key=f"{key_prefix}_strategy",
         )
     with c6:
