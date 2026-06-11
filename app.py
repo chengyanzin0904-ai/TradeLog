@@ -60,6 +60,114 @@ def metric_card(label: str, value: str) -> None:
     st.metric(label, value)
 
 
+def compact_trade_form(default: Trade | None = None, key_prefix: str = "quick") -> dict:
+    default = default or Trade.empty()
+    st.caption("按你的日志习惯做了精简：先记一行流水，详细复盘以后再补。")
+
+    c1, c2, c3, c4 = st.columns([1.1, 1, 1, 1])
+    with c1:
+        trade_date = st.date_input("日期", value=pd.to_datetime(default.date).date(), key=f"{key_prefix}_date")
+    with c2:
+        symbol_private = st.text_input("币种", value=default.symbol_private, placeholder="HYPE / NEAR", key=f"{key_prefix}_symbol")
+    with c3:
+        status = st.selectbox(
+            "状态",
+            ["Closed", "Open", "Watching"],
+            index=["Closed", "Open", "Watching"].index(default.status) if default.status in ["Closed", "Open", "Watching"] else 0,
+            key=f"{key_prefix}_status",
+        )
+    with c4:
+        direction = st.selectbox(
+            "方向",
+            ["SHORT", "LONG"],
+            index=0 if default.direction.lower() == "short" else 1,
+            key=f"{key_prefix}_direction",
+        )
+
+    c5, c6, c7 = st.columns([1.4, 1.1, 0.8])
+    with c5:
+        strategy_name = st.text_input(
+            "策略",
+            value=default.strategy_name,
+            placeholder="震荡策略1：高抛低吸",
+            key=f"{key_prefix}_strategy",
+        )
+    with c6:
+        weight = st.selectbox(
+            "权重",
+            ["标准 (1A+1B)", "轻仓", "观察仓", "高确定性"],
+            index=["标准 (1A+1B)", "轻仓", "观察仓", "高确定性"].index(default.weight)
+            if default.weight in ["标准 (1A+1B)", "轻仓", "观察仓", "高确定性"]
+            else 0,
+            key=f"{key_prefix}_weight",
+        )
+    with c7:
+        result_r = st.number_input("R", value=float(default.result_r), step=0.5, key=f"{key_prefix}_result_r")
+
+    c8, c9, c10 = st.columns([1, 1, 2])
+    with c8:
+        pnl_amount = st.number_input("盈利", value=float(default.pnl_amount), step=1.0, key=f"{key_prefix}_pnl")
+    with c9:
+        inferred = "Profit" if result_r > 0 else "Loss" if result_r < 0 else "BE"
+        outcome = st.selectbox(
+            "结果",
+            ["BE", "Profit", "Loss"],
+            index=["BE", "Profit", "Loss"].index(default.outcome if default.outcome in ["BE", "Profit", "Loss"] else inferred),
+            key=f"{key_prefix}_outcome",
+        )
+    with c10:
+        chart_url = st.text_input("图表", value=default.chart_url, placeholder="TradingView 链接", key=f"{key_prefix}_chart")
+
+    entry_reason = st.text_input(
+        "入场",
+        value=default.entry_reason,
+        placeholder="前高背离 + 5m 区间跌破",
+        key=f"{key_prefix}_entry",
+    )
+
+    return {
+        "date": trade_date.isoformat(),
+        "market": "crypto",
+        "symbol_private": symbol_private.strip().upper(),
+        "symbol_public": symbol_private.strip().upper() or config["content"]["public_symbol_default"],
+        "status": status,
+        "direction": direction.lower(),
+        "strategy_name": strategy_name,
+        "weight": weight,
+        "result_r": result_r,
+        "pnl_amount": pnl_amount,
+        "outcome": outcome,
+        "chart_url": chart_url,
+        "entry_reason": entry_reason,
+        "is_planned": True,
+        "grade": "B" if outcome != "Loss" else "C",
+        "planned_risk_r": 1.0,
+        "emotion_score": 3,
+    }
+
+
+def display_trades_table(trades: list[dict]) -> None:
+    if not trades:
+        st.info("暂无交易记录。")
+        return
+    df = pd.DataFrame(trades)
+    columns = {
+        "date": "日期",
+        "symbol_private": "币种",
+        "status": "状态",
+        "direction": "方向",
+        "strategy_name": "策略",
+        "weight": "权重",
+        "result_r": "R",
+        "pnl_amount": "盈利",
+        "outcome": "结果",
+        "chart_url": "图表",
+        "entry_reason": "入场",
+    }
+    present = [col for col in columns if col in df.columns]
+    st.dataframe(df[present].rename(columns=columns), use_container_width=True, hide_index=True)
+
+
 def trade_form(default: Trade | None = None, key_prefix: str = "create") -> dict:
     default = default or Trade.empty()
     c1, c2, c3 = st.columns(3)
@@ -224,7 +332,7 @@ def dashboard() -> None:
     with right:
         st.subheader("最近 5 笔交易")
         if trades:
-            st.dataframe(pd.DataFrame(trades).head(5), use_container_width=True)
+            display_trades_table(trades[:5])
         else:
             st.warning("暂无交易。可以先录入一笔，或导入示例数据。")
             if st.button("导入示例交易数据"):
@@ -266,8 +374,8 @@ def charts() -> None:
 
 
 def create_trade_page() -> None:
-    st.header("录入交易")
-    payload = trade_form()
+    st.header("快速录入交易")
+    payload = compact_trade_form()
     if st.button("保存交易", type="primary"):
         errors = validate_trade_payload(payload)
         if errors:
@@ -277,6 +385,7 @@ def create_trade_page() -> None:
         trade = Trade(trade_id="", **payload)
         trade_id = create_trade(trade)
         st.success(f"已保存交易：{trade_id}")
+        st.info("需要补充截图、情绪或详细复盘时，可以去“交易列表”里编辑这笔记录。")
 
 
 def list_and_edit_page() -> None:
@@ -304,7 +413,7 @@ def list_and_edit_page() -> None:
             "is_planned": is_planned,
         }
     )
-    st.dataframe(pd.DataFrame(trades), use_container_width=True)
+    display_trades_table(trades)
     if not trades:
         return
 

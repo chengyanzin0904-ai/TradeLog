@@ -29,6 +29,11 @@ class Trade:
     timeframe_context: str = "1H"
     timeframe_entry: str = "5M"
     session: str = ""
+    status: str = "Closed"
+    weight: str = "标准 (1A+1B)"
+    pnl_amount: float = 0.0
+    outcome: str = "BE"
+    chart_url: str = ""
     entry_price: float = 0.0
     stop_price: float = 0.0
     exit_price: float = 0.0

@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS trades (
     timeframe_context TEXT,
     timeframe_entry TEXT,
     session TEXT,
+    status TEXT,
+    weight TEXT,
+    pnl_amount REAL,
+    outcome TEXT,
+    chart_url TEXT,
     entry_price REAL,
     stop_price REAL,
     exit_price REAL,
@@ -76,6 +81,15 @@ CREATE TABLE IF NOT EXISTS settings (
 """
 
 
+EXTRA_COLUMNS = {
+    "status": "TEXT DEFAULT 'Closed'",
+    "weight": "TEXT DEFAULT '标准 (1A+1B)'",
+    "pnl_amount": "REAL DEFAULT 0",
+    "outcome": "TEXT DEFAULT 'BE'",
+    "chart_url": "TEXT DEFAULT ''",
+}
+
+
 def connect(db_path: Path | str = DB_PATH) -> sqlite3.Connection:
     path = Path(db_path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -87,6 +101,13 @@ def connect(db_path: Path | str = DB_PATH) -> sqlite3.Connection:
 def init_db(db_path: Path | str = DB_PATH) -> None:
     with connect(db_path) as conn:
         conn.executescript(SCHEMA)
+        existing = {
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(trades)").fetchall()
+        }
+        for column, definition in EXTRA_COLUMNS.items():
+            if column not in existing:
+                conn.execute(f"ALTER TABLE trades ADD COLUMN {column} {definition}")
 
 
 def generate_trade_id(trade_date: str, db_path: Path | str = DB_PATH) -> str:
@@ -185,6 +206,11 @@ def seed_example_data(db_path: Path | str = DB_PATH) -> None:
             direction="long",
             strategy_name="趋势回踩",
             setup_type="关键位回踩确认",
+            status="Closed",
+            weight="标准 (1A+1B)",
+            pnl_amount=80.0,
+            outcome="Profit",
+            chart_url="https://www.tradingview.com/",
             result_r=1.8,
             is_planned=True,
             grade="A",
@@ -201,6 +227,11 @@ def seed_example_data(db_path: Path | str = DB_PATH) -> None:
             direction="short",
             strategy_name="区间失败",
             setup_type="假突破回落",
+            status="Closed",
+            weight="标准 (1A+1B)",
+            pnl_amount=-42.0,
+            outcome="Loss",
+            chart_url="https://www.tradingview.com/",
             result_r=-1.0,
             is_planned=True,
             grade="B",
@@ -216,6 +247,11 @@ def seed_example_data(db_path: Path | str = DB_PATH) -> None:
             direction="long",
             strategy_name="突破追踪",
             setup_type="突破后追单",
+            status="Closed",
+            weight="标准 (1A+1B)",
+            pnl_amount=0.0,
+            outcome="BE",
+            chart_url="https://www.tradingview.com/",
             result_r=-0.7,
             is_planned=False,
             grade="C",
