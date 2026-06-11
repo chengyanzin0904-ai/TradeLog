@@ -1,0 +1,17 @@
+risk:
+  max_single_trade_r: 1
+  max_daily_loss_r: 1.5
+  max_weekly_loss_r: 3
+  max_monthly_loss_r: 5
+  pause_after_consecutive_losses: 3
+
+content:
+  add_disclaimer: true
+  public_symbol_default: "品种A"
+  forbidden_words_check: true
+
+project:
+  name: "180天真实交易系统验证"
+  main_timeframe: "1H"
+  entry_timeframe: "5M"
+  allow_1m_signal: false

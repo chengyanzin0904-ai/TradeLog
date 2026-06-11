@@ -1,0 +1,29 @@
+# {{ title }}
+
+生成时间：{{ generated_at }}
+
+## 今日概览
+- 今日是否交易：{{ "是" if trades else "否" }}
+- 今日总 R：{{ "%.2f"|format(metrics.total_r) }}
+- 交易次数：{{ metrics.total_trades }}
+- 胜率：{{ "%.0f%%"|format(metrics.win_rate * 100) }}
+
+## 今日交易列表
+{% if trades %}
+{% for trade in trades %}
+- {{ trade.trade_id }}｜{{ trade.symbol_public }}｜{{ trade.strategy_name }}｜{{ "%.2f"|format(trade.result_r) }}R｜计划内：{{ "是" if trade.is_planned else "否" }}｜等级：{{ trade.grade }}
+{% endfor %}
+{% else %}
+- 今日无交易记录。
+{% endif %}
+
+## 今日最大问题
+- {% if metrics.fomo_count or metrics.chased_after_miss_count %}存在 FOMO 或错过后追单，需要复盘触发条件。{% else %}暂无明显纪律问题，继续保持记录完整性。{% endif %}
+
+## 今日最大进步
+- 优先评价策略和执行，不评价个人价值。
+
+## 明日规则提醒
+- 错过后必须重新定价，不允许追单。
+- 内容不能反向驱动交易。
+- 公开内容不喊单、不承诺收益、不诱导交易。

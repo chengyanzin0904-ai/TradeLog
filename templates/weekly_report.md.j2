@@ -1,0 +1,34 @@
+# {{ title }}
+
+生成时间：{{ generated_at }}
+
+## 核心数据
+- 本周总 R：{{ "%.2f"|format(metrics.total_r) }}
+- 交易次数：{{ metrics.total_trades }}
+- 胜率：{{ "%.0f%%"|format(metrics.win_rate * 100) }}
+- 平均 R：{{ "%.2f"|format(metrics.average_r) }}
+- 最大回撤：{{ "%.2f"|format(metrics.max_drawdown_r) }}R
+- 计划内比例：{{ "%.0f%%"|format(metrics.planned_ratio * 100) }}
+
+## A/B/C 占比
+{% for grade in grades %}
+- {{ grade.grade }}：{{ grade.count }} 笔，合计 {{ "%.2f"|format(grade.sum_r) }}R
+{% endfor %}
+
+## 最大问题
+- FOMO 次数：{{ metrics.fomo_count }}
+- 错过后追单次数：{{ metrics.chased_after_miss_count }}
+- 报复交易次数：{{ metrics.revenge_trade_count }}
+
+## 最值得复盘的一笔交易
+{% if trades %}
+{% set sorted = trades|sort(attribute="result_r") %}
+- {{ sorted[0].trade_id }}｜{{ sorted[0].symbol_public }}｜{{ "%.2f"|format(sorted[0].result_r) }}R｜重点复盘执行和失效条件。
+{% else %}
+- 本周暂无交易。
+{% endif %}
+
+## 下周改进规则
+- 先确认失效条件，再允许入场。
+- 连续亏损后降低频率，优先复盘。
+- 不为内容生产而交易。

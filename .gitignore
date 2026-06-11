@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+data/trades.db
+data/exports/*.md
+screenshots/private/*
+screenshots/public/*
+!screenshots/private/.gitkeep
+!screenshots/public/.gitkeep

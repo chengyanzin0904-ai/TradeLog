@@ -1,0 +1,28 @@
+# {{ title }}
+
+生成时间：{{ generated_at }}
+
+## 月度核心数据
+- 本月总 R：{{ "%.2f"|format(metrics.total_r) }}
+- 交易次数：{{ metrics.total_trades }}
+- 胜率：{{ "%.0f%%"|format(metrics.win_rate * 100) }}
+- 平均盈利 R：{{ "%.2f"|format(metrics.avg_win_r) }}
+- 平均亏损 R：{{ "%.2f"|format(metrics.avg_loss_r) }}
+- 盈亏比：{{ "%.2f"|format(metrics.profit_loss_ratio) }}
+- 期望值：{{ "%.2f"|format(metrics.expectancy) }}
+- 最大回撤：{{ "%.2f"|format(metrics.max_drawdown_r) }}R
+- 最大连续亏损：{{ metrics.max_loss_streak }}
+- 计划内比例：{{ "%.0f%%"|format(metrics.planned_ratio * 100) }}
+- C 级交易次数：{% for grade in grades if grade.grade == "C" %}{{ grade.count }}{% else %}0{% endfor %}
+- FOMO 次数：{{ metrics.fomo_count }}
+- 错过后追单次数：{{ metrics.chased_after_miss_count }}
+- 为了证明自己而交易次数：{{ metrics.proof_mindset_count }}
+
+## 本月系统结论
+- 重点观察计划内比例、C 级交易占比和最大回撤是否符合系统验证目标。
+- 公开内容应优先展示风控、执行和复盘，而不是炫耀收益。
+
+## 下月改进计划
+- 明确每种策略的有效场景和失效条件。
+- 连续亏损后暂停正式交易，转入复盘模式。
+- 建立公开内容发布前的敏感词检查流程。

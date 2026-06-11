@@ -1,0 +1,18 @@
+# 个人交易复盘：{{ trade.symbol_public or "品种A" }}
+
+这是一篇个人交易复盘和学习记录，重点是记录计划、执行、情绪和风险控制。
+
+## 背景
+- 公开品种：{{ trade.symbol_public or "品种A" }}
+- 策略：{{ trade.strategy_name or "未命名策略" }}
+- 场景：{{ trade.setup_type or "未记录" }}
+
+## 执行
+- 是否计划内：{{ "是" if trade.is_planned else "否" }}
+- 执行等级：{{ trade.grade or "-" }}
+- 复盘重点：{{ trade.management_notes or trade.notes or "继续完善交易记录。" }}
+
+## 风险提示
+本内容不提供实时买卖建议，不承诺收益，不鼓励高频或高风险交易。
+
+声明：本文仅为个人交易复盘和学习记录，不构成任何投资建议。交易存在风险，历史结果不代表未来表现。请独立判断并控制风险。
