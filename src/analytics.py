@@ -108,9 +108,10 @@ def grade_stats(df: pd.DataFrame) -> pd.DataFrame:
 def period_r(df: pd.DataFrame, freq: str) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame(columns=["period", "result_r"])
-    grouped = df.set_index("date")["result_r"].resample(freq).sum().reset_index()
+    pandas_freq = {"M": "ME"}.get(freq, freq)
+    grouped = df.set_index("date")["result_r"].resample(pandas_freq).sum().reset_index()
     grouped["period"] = grouped["date"].dt.strftime("%Y-%m-%d" if freq == "D" else "%Y-%m")
-    if freq == "W":
+    if freq.startswith("W"):
         grouped["period"] = grouped["date"].dt.strftime("%G-W%V")
     return grouped[["period", "result_r"]]
 

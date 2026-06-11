@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.analytics import calculate_metrics, grade_stats, max_drawdown, to_dataframe
+from src.analytics import calculate_metrics, grade_stats, max_drawdown, period_r, to_dataframe
 
 
 def sample_df():
@@ -48,3 +48,8 @@ def test_grade_stats():
     assert by_grade["A"]["sum_r"] == 3.0
     assert by_grade["C"]["count"] == 2
     assert by_grade["C"]["sum_r"] == -1.0
+
+
+def test_monthly_period_r_uses_current_pandas_frequency():
+    monthly = period_r(sample_df(), "M")
+    assert monthly.to_dict("records") == [{"period": "2026-06", "result_r": 1.0}]
